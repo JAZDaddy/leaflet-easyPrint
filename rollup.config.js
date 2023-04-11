@@ -1,20 +1,20 @@
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import babel from 'rollup-plugin-babel';
-import uglify from 'rollup-plugin-uglify';
+import { terser } from 'rollup-plugin-terser';
 
 export default {
-  entry: 'src/main.js',
-  format: 'umd',
-  moduleName: 'leaflet-easyprint',
+  input: 'src/main.js',
+  moduleContext: 'leaflet-easyprint',
+  output: [
+      { file: "dist/bundle.js", format: "umd" },
+  ],
   plugins: [ 
     resolve(),
     babel({
       exclude: 'node_modules/**'
     }),
-    uglify(),
+    terser(),
     commonjs()
   ],
-  sourceMap: true,
-  dest: 'dist/bundle.js'
 };

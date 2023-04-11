@@ -1,4 +1,4 @@
-var domtoimage = require('dom-to-image');
+var htmltoimage = require('html-to-image');
 var fileSaver = require('file-saver');
 
 L.Control.EasyPrint = L.Control.extend({
@@ -18,8 +18,11 @@ L.Control.EasyPrint = L.Control.extend({
     defaultSizeTitles: {
       Current: 'Current Size',
       A4Landscape: 'A4 Landscape',
-      A4Portrait: 'A4 Portrait'
-    }
+      A4Portrait: 'A4 Portrait',
+      LetterLandscape: 'Letter Landscape',
+      LetterPortrait: 'Letter Portrait'
+    },
+    skipFonts: false,
   },
 
   onAdd: function () { 
@@ -45,6 +48,22 @@ L.Control.EasyPrint = L.Control.extend({
           width: this._a4PageSize.height,
           name: this.options.defaultSizeTitles.A4Portrait,
           className: 'A4Portrait page'
+        }
+      }
+      if (sizeMode === 'LetterLandscape') { 
+        return {
+          height: this._letterPageSize.height,
+          width: this._letterPageSize.width,
+          name: this.options.defaultSizeTitles.LetterLandscape,
+          className: 'LetterLandscape page'
+        }
+      }
+      if (sizeMode === 'LetterPortrait') {
+        return {
+          height: this._letterPageSize.width,
+          width: this._letterPageSize.height,
+          name: this.options.defaultSizeTitles.LetterPortrait,
+          className: 'LetterPortrait page'
         }
       };
       return sizeMode;
@@ -124,9 +143,10 @@ L.Control.EasyPrint = L.Control.extend({
 
   _createImagePlaceholder: function (sizeMode) {
     var plugin = this;
-    domtoimage.toPng(this.mapContainer, {
+    htmltoimage.toPng(this.mapContainer, {
         width: parseInt(this.originalState.mapWidth.replace('px')),
-        height: parseInt(this.originalState.mapHeight.replace('px'))
+        height: parseInt(this.originalState.mapHeight.replace('px')),
+        skipFonts: this.options.skipFonts,
       })
       .then(function (dataUrl) {
         plugin.blankDiv = document.createElement("div");
@@ -185,9 +205,10 @@ L.Control.EasyPrint = L.Control.extend({
     if (this.originalState.widthWasAuto && sizemode === 'CurrentSize' || this.originalState.widthWasPercentage && sizemode === 'CurrentSize') {
       widthForExport = this.originalState.mapWidth
     }
-    domtoimage.toPng(plugin.mapContainer, {
+    htmltoimage.toPng(plugin.mapContainer, {
         width: parseInt(widthForExport),
-        height: parseInt(plugin.mapContainer.style.height.replace('px'))
+        height: parseInt(plugin.mapContainer.style.height.replace('px')),
+        skipFonts: this.options.skipFonts,
       })
       .then(function (dataUrl) {
           var blob = plugin._dataURItoBlob(dataUrl);
@@ -364,6 +385,9 @@ L.Control.EasyPrint = L.Control.extend({
     .easyPrintHolder .A4Landscape { 
       transform: rotate(-90deg);
     }
+    .easyPrintHolder .LetterLandscape {
+      transform: rotate(-90deg);
+    }
 
     .leaflet-control-easyPrint-button{
       display: inline-block;
@@ -437,6 +461,11 @@ L.Control.EasyPrint = L.Control.extend({
   _a4PageSize: {
     height: 715,
     width: 1045
+  },
+
+  _letterPageSize: {
+    height: 735,
+    width: 982
   }
 
 });
